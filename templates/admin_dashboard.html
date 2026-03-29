@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">Admin control</p>
+    <h1>Role-based hiring command center.</h1>
+    <p>Select a job from the horizontal navigation to inspect its ranked candidates, structured findings, and role-specific decision signals.</p>
+  </div>
+</section>
+
+<section class="card-grid four">
+  <article class="metric-card">
+    <span>Analysed candidates</span>
+    <strong>{{ stats.total_candidates }}</strong>
+  </article>
+  <article class="metric-card">
+    <span>Open jobs</span>
+    <strong>{{ stats.total_jobs }}</strong>
+  </article>
+  <article class="metric-card">
+    <span>Top score</span>
+    <strong>{{ stats.top_score }}%</strong>
+  </article>
+  <article class="metric-card">
+    <span>Average score</span>
+    <strong>{{ stats.average_score }}%</strong>
+  </article>
+</section>
+
+<section class="card">
+  <h2>Job Navigation</h2>
+  <div class="requirements">
+    {% for job in jobs %}
+      <a class="tag {% if job['id'] == selected_job_id %}strong{% endif %}" href="{{ url_for('admin_dashboard', job_id=job['id']) }}">{{ job["title"] }} | {{ job["department"] }}</a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card-grid two">
+  <article class="card">
+    <h2>Create Another Job Requirement</h2>
+    <form class="form-card" method="post" action="{{ url_for('create_job') }}">
+      <label>Job Title
+        <input type="text" name="title" required>
+      </label>
+      <label>Department
+        <input type="text" name="department" required>
+      </label>
+      <label>Location
+        <input type="text" name="location" required>
+      </label>
+      <label>Employment Type
+        <input type="text" name="employment_type" required>
+      </label>
+      <label>Short Summary
+        <input type="text" name="summary" required>
+      </label>
+      <label>Role Overview
+        <textarea name="role_overview" rows="4" required></textarea>
+      </label>
+      <label>Responsibilities
+        <textarea name="responsibilities_text" rows="5" required></textarea>
+      </label>
+      <label>Qualifications
+        <textarea name="qualifications_text" rows="5" required></textarea>
+      </label>
+      <label>Preferred
+        <textarea name="preferred_text" rows="4"></textarea>
+      </label>
+      <label>Requirements
+        <textarea name="requirements_text" rows="6" required></textarea>
+      </label>
+      <label>Minimum Experience
+        <input type="number" step="0.1" min="0" name="min_experience" required>
+      </label>
+      <button class="button primary" type="submit">Add Job</button>
+    </form>
+  </article>
+  <article class="card">
+    <h2>Selected Job</h2>
+    {% if selected_job %}
+      <p><strong>{{ selected_job["title"] }}</strong></p>
+      <div class="job-meta">
+        <span class="meta-chip">{{ selected_job["department"] }}</span>
+        <span class="meta-chip">{{ selected_job["location"] }}</span>
+        <span class="meta-chip">{{ selected_job["employment_type"] }}</span>
+      </div>
+      <p class="subtle">{{ selected_job["summary"] }}</p>
+      <p>{{ selected_job["role_overview"] }}</p>
+      <div class="requirements">
+        {% for item in selected_job["requirements_list"] %}
+          <span class="tag">{{ item }}</span>
+        {% endfor %}
+      </div>
+      <h3>Responsibilities</h3>
+      <ul>
+        {% for item in selected_job["responsibilities_list"] %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+      <h3>Qualifications</h3>
+      <ul>
+        {% for item in selected_job["qualifications_list"] %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="subtle">No job selected.</p>
+    {% endif %}
+  </article>
+</section>
+
+<section class="card">
+  <h2>Candidate Ranking for Selected Job</h2>
+  <table>
+    <tr>
+      <th>Rank</th>
+      <th>Candidate Index</th>
+      <th>Candidate ID</th>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Fit</th>
+      <th>Expertise</th>
+      <th>Experience</th>
+      <th>Projects</th>
+      <th>Achievements</th>
+      <th>Education</th>
+      <th>Keyword</th>
+      <th>Overall</th>
+    </tr>
+    {% for row in rankings %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ row["candidate_index"] }}</td>
+        <td>{{ row["candidate_code"] }}</td>
+        <td><a href="{{ url_for('admin_dashboard', job_id=selected_job_id, candidate_id=row['candidate_id']) }}">{{ row["name"] }}</a></td>
+        <td>{{ row["status"] }}</td>
+        <td>{{ row["fit_label"] }}</td>
+        <td>{{ row["skill_score"] }}%</td>
+        <td>{{ row["experience_score"] }}%</td>
+        <td>{{ row["project_score"] or 0 }}%</td>
+        <td>{{ row["achievement_score"] or 0 }}%</td>
+        <td>{{ row["education_score"] }}%</td>
+        <td>{{ row["keyword_score"] }}%</td>
+        <td><strong>{{ row["overall_score"] }}%</strong></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="13">No analysed candidates for this job yet.</td></tr>
+    {% endfor %}
+  </table>
+</section>
+
+{% if selected_candidate %}
+<section class="card-grid two">
+  <article class="card">
+    <h2>Candidate Detail</h2>
+    <p><strong>{{ selected_candidate["name"] }}</strong></p>
+    <p class="subtle">{{ selected_candidate["email"] }} | {{ selected_candidate["phone"] }}</p>
+    <p class="subtle">{{ selected_candidate["title"] }}</p>
+    <p><strong>Fit:</strong> {{ selected_candidate["fit_label"] }} | <strong>Status:</strong> {{ selected_candidate["status"] }}</p>
+    <p><strong>CGPA:</strong> {{ selected_candidate["cgpa"] or "Not detected" }}</p>
+    <p class="subtle">{{ selected_candidate["profile_summary"] or selected_candidate["summary"].get("reasoning", "No summary stored.") }}</p>
+    {% if selected_candidate["ranking_basis"] %}
+      <p><strong>Ranking Basis:</strong> {{ selected_candidate["ranking_basis"] }}</p>
+    {% endif %}
+    <h3>Important Keywords</h3>
+    <div class="requirements">
+      {% for keyword in selected_candidate["keywords_found"] %}
+        <span class="tag">{{ keyword }}</span>
+      {% else %}
+        <span class="subtle">No keywords stored.</span>
+      {% endfor %}
+    </div>
+    <h3>Projects</h3>
+    <ul>
+      {% for project in selected_candidate["projects"] %}
+        <li>{{ project }}</li>
+      {% else %}
+        <li>No projects stored.</li>
+      {% endfor %}
+    </ul>
+    <h3>Achievements</h3>
+    <ul>
+      {% for achievement in selected_candidate["achievements"] %}
+        <li>{{ achievement }}</li>
+      {% else %}
+        <li>No achievements stored.</li>
+      {% endfor %}
+    </ul>
+    <h3>What The Candidate Has</h3>
+    <ul>
+      {% for item in selected_candidate["candidate_has"] %}
+        <li>{{ item["finding_text"] if item["finding_text"] is defined else item["text"] }}</li>
+      {% else %}
+        <li>No strengths stored.</li>
+      {% endfor %}
+    </ul>
+    <h3>What Is Missing</h3>
+    <ul>
+      {% for item in selected_candidate["candidate_missing"] %}
+        <li>{{ item["finding_text"] if item["finding_text"] is defined else item["text"] }}</li>
+      {% else %}
+        <li>No missing items stored.</li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="card">
+    <h2>Prioritised Parameters</h2>
+    <table>
+      <tr><th>Parameter</th><th>Group</th><th>Priority</th><th>Score</th><th>Evidence</th></tr>
+      {% for item in selected_candidate["parameter_scores"] %}
+        <tr>
+          <td>{{ item["parameter_name"] }}</td>
+          <td>{{ item["parameter_group"] }}</td>
+          <td>{{ item["priority"] }}</td>
+          <td>{{ item["score"] }}%</td>
+          <td>{{ item["evidence"] or "-" }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5">No parameter scores stored.</td></tr>
+      {% endfor %}
+    </table>
+  </article>
+</section>
+
+<section class="card-grid two">
+  <article class="card">
+    <h2>Pros</h2>
+    <ul>
+      {% for item in selected_candidate["pros"] %}
+        <li>{{ item["finding_text"] }}</li>
+      {% else %}
+        <li>No pros stored.</li>
+      {% endfor %}
+    </ul>
+    <h2>Cons</h2>
+    <ul>
+      {% for item in selected_candidate["cons"] %}
+        <li>{{ item["finding_text"] }}</li>
+      {% else %}
+        <li>No cons stored.</li>
+      {% endfor %}
+    </ul>
+  </article>
+  <article class="card">
+    <h2>Risks</h2>
+    <ul>
+      {% for item in selected_candidate["risks"] %}
+        <li>{{ item["finding_text"] }}</li>
+      {% else %}
+        <li>No risks stored.</li>
+      {% endfor %}
+    </ul>
+    <h2>Blindspots</h2>
+    <ul>
+      {% for item in selected_candidate["blindspots"] %}
+        <li>{{ item["finding_text"] }}</li>
+      {% else %}
+        <li>No blindspots stored.</li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+{% endif %}
+
+{% if rankings %}
+<section class="card-grid two">
+  <article class="card">
+    <h2>Overall Ranking</h2>
+    <img class="chart" src="{{ url_for('static', filename='overall_ranking.png') }}?v={{ chart_stamp }}" alt="Overall ranking chart">
+  </article>
+  <article class="card">
+    <h2>Parameter Comparison</h2>
+    <img class="chart" src="{{ url_for('static', filename='parameter_comparison.png') }}?v={{ chart_stamp }}" alt="Parameter comparison chart">
+  </article>
+</section>
+{% endif %}
+{% endblock %}

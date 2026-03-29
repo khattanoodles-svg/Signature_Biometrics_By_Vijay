@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Apply for {{ job["title"] }}{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">Job application form</p>
+    <h1>{{ job["title"] }}</h1>
+    <p>{{ job["summary"] }}</p>
+    <div class="job-meta">
+      <span class="meta-chip">{{ job["department"] }}</span>
+      <span class="meta-chip">{{ job["location"] }}</span>
+      <span class="meta-chip">{{ job["employment_type"] }}</span>
+    </div>
+    <p class="subtle">Candidate {{ candidate["candidate_code"] }} | Index {{ candidate["candidate_index"] }}</p>
+  </div>
+</section>
+
+<section class="card-grid two">
+  <article class="card">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Detailed Job Brief</p>
+        <h2>Role Overview</h2>
+      </div>
+      <span class="badge">{{ job["min_experience"] }} years minimum</span>
+    </div>
+    <p>{{ job["role_overview"] }}</p>
+    <div class="overview-grid">
+      <div class="detail-panel">
+        <h3>Business Function</h3>
+        <p class="subtle">{{ job["department"] }}</p>
+      </div>
+      <div class="detail-panel">
+        <h3>Work Location</h3>
+        <p class="subtle">{{ job["location"] }}</p>
+      </div>
+      <div class="detail-panel">
+        <h3>Employment Model</h3>
+        <p class="subtle">{{ job["employment_type"] }}</p>
+      </div>
+    </div>
+
+    <h3>Core Requirements</h3>
+    <div class="requirements">
+      {% for item in job["requirements_list"] %}
+        <span class="tag">{{ item }}</span>
+      {% endfor %}
+    </div>
+
+    <h3>Key Responsibilities</h3>
+    <ul>
+      {% for item in job["responsibilities_list"] %}
+        <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+
+    <h3>Required Qualifications</h3>
+    <ul>
+      {% for item in job["qualifications_list"] %}
+        <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+
+    {% if job["preferred_list"] %}
+      <h3>Preferred Qualifications</h3>
+      <ul>
+        {% for item in job["preferred_list"] %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </article>
+
+  <form class="card form-card" method="post" enctype="multipart/form-data">
+    <h2>Upload Resume</h2>
+    <p class="subtle">Submit the resume that best matches this role. The evaluation prioritizes the document content, work history, projects, and role-specific evidence.</p>
+    <label>Word Resume (.docx)
+      <input type="file" name="resume" accept=".docx" required>
+    </label>
+    <label>Candidate Note
+      <textarea name="cover_note" rows="6" placeholder="Optional note about role interest"></textarea>
+    </label>
+    <button class="button primary" type="submit">Submit Application</button>
+  </form>
+</section>
+{% endblock %}

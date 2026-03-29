@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Candidate Registration{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Candidate registration</p>
+    <h1>Create your candidate account.</h1>
+  </div>
+</section>
+
+<section class="single-card">
+  <form class="card form-card" method="post">
+    <label>Name
+      <input type="text" name="name" required>
+    </label>
+    <label>Email
+      <input type="email" name="email" required>
+    </label>
+    <label>Phone Number
+      <input type="text" name="phone" required>
+    </label>
+    <label>Password
+      <input type="password" name="password" required>
+    </label>
+    <button class="button primary" type="submit">Register</button>
+  </form>
+</section>
+{% endblock %}

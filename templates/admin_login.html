@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Admin Login{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Special admin login</p>
+    <h1>Admins are redirected to the visualisation dashboard.</h1>
+    <p class="subtle">Default admin credentials: <strong>admin</strong> / <strong>admin123</strong></p>
+  </div>
+</section>
+
+<section class="single-card">
+  <form class="card form-card" method="post">
+    <label>Username
+      <input type="text" name="username" required>
+    </label>
+    <label>Password
+      <input type="password" name="password" required>
+    </label>
+    <button class="button primary" type="submit">Admin Login</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Candidate Login{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">Candidate login</p>
+    <h1>Log in to view jobs and apply.</h1>
+  </div>
+</section>
+
+<section class="single-card">
+  <form class="card form-card" method="post">
+    <label>Email
+      <input type="email" name="email" required>
+    </label>
+    <label>Password
+      <input type="password" name="password" required>
+    </label>
+    <button class="button primary" type="submit">Login</button>
+  </form>
+</section>
+{% endblock %}

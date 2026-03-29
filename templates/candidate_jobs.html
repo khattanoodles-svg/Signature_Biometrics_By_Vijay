@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Candidate Jobs{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">Candidate portal</p>
+    <h1>Welcome, {{ candidate["name"] }}</h1>
+    <p>
+      Candidate ID: <strong>{{ candidate["candidate_code"] }}</strong>
+      <span class="dot">|</span>
+      Candidate Index: <strong>{{ candidate["candidate_index"] }}</strong>
+    </p>
+  </div>
+</section>
+
+{% if latest_application %}
+<section class="card-grid four">
+  <article class="metric-card">
+    <span>Latest job</span>
+    <strong>{{ latest_application["title"] }}</strong>
+  </article>
+  <article class="metric-card">
+    <span>Overall score</span>
+    <strong>{{ latest_application["overall_score"] or 0 }}%</strong>
+  </article>
+  <article class="metric-card">
+    <span>Fit</span>
+    <strong>{{ latest_application["fit_label"] }}</strong>
+  </article>
+  <article class="metric-card">
+    <span>Status</span>
+    <strong>{{ latest_application["status"] }}</strong>
+  </article>
+</section>
+
+{% if latest_application["status"] == "Rejected" %}
+<section class="card">
+  <h2>Application Rejected</h2>
+  <p class="subtle">Your resume was not accepted for the selected role. The system evaluated the uploaded document against the role requirements and found the following issues.</p>
+  <ul>
+    {% for reason in latest_application["rejection_reasons"] %}
+      <li>{{ reason }}</li>
+    {% else %}
+      <li>The uploaded resume did not satisfy the minimum fit conditions for this role.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endif %}
+
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Open opportunities</p>
+    <h2>Select a role that matches your background and continue to the full job brief.</h2>
+  </div>
+</section>
+
+<section class="job-column">
+  {% for job in jobs %}
+    <article class="card job-card">
+      <div class="job-topline">
+        <div class="job-heading">
+          <p class="eyebrow">{{ job["department"] }}</p>
+          <h3 class="job-title">{{ job["title"] }}</h3>
+        </div>
+        <span class="badge">{{ job["min_experience"] }} yrs min</span>
+      </div>
+      <div class="job-meta">
+        <span class="meta-chip">{{ job["location"] }}</span>
+        <span class="meta-chip">{{ job["employment_type"] }}</span>
+        <span class="meta-chip">Candidate Index Slot {{ candidate["candidate_index"] }}</span>
+      </div>
+      <p class="subtle">{{ job["summary"] }}</p>
+      <p class="job-copy">{{ job["role_overview"] }}</p>
+      <div>
+        <h3 class="job-section-title">Core Hiring Signals</h3>
+        <div class="requirements">
+          {% for item in job["requirements_list"] %}
+            <span class="tag">{{ item }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div>
+        <h3 class="job-section-title">What This Role Expects</h3>
+        <ul class="job-list">
+          {% for item in job["qualifications_list"][:3] %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="requirements">
+        <span class="tag strong">Realistic corporate hiring brief</span>
+      </div>
+      <a class="button primary" href="{{ url_for('apply_job', job_id=job['id']) }}">View Requirements and Apply</a>
+    </article>
+  {% endfor %}
+</section>
+
+{% if latest_application %}
+<section class="card-grid two">
+  <article class="card">
+    <h2>Latest Analysis Breakdown</h2>
+    <table>
+      <tr><th>Parameter</th><th>Score</th></tr>
+      <tr><td>Fit Decision</td><td>{{ latest_application["fit_label"] }}</td></tr>
+      <tr><td>Skill Match</td><td>{{ latest_application["skill_score"] or 0 }}%</td></tr>
+      <tr><td>Experience Match</td><td>{{ latest_application["experience_score"] or 0 }}%</td></tr>
+      <tr><td>Education Match</td><td>{{ latest_application["education_score"] or 0 }}%</td></tr>
+      <tr><td>Keyword Match</td><td>{{ latest_application["keyword_score"] or 0 }}%</td></tr>
+      <tr><td>Completeness</td><td>{{ latest_application["completeness_score"] or 0 }}%</td></tr>
+      <tr><td>Document Quality</td><td>{{ latest_application["quality_score"] or 0 }}%</td></tr>
+      <tr><td>CGPA</td><td>{{ latest_application["cgpa"] or "Not detected" }}</td></tr>
+    </table>
+  </article>
+  <article class="card">
+    <h2>Important Resume Signals</h2>
+    <p class="subtle">{{ latest_application["profile_summary"] or latest_application["summary"].get("reasoning", "No reasoning stored.") }}</p>
+    {% if latest_application["ranking_basis"] %}
+      <h3>Ranking Basis</h3>
+      <p class="subtle">{{ latest_application["ranking_basis"] }}</p>
+    {% endif %}
+    <h3>What Your Resume Has</h3>
+    <ul>
+      {% for item in latest_application["candidate_has"] %}
+        <li>{{ item["finding_text"] if item["finding_text"] is defined else item["text"] }}</li>
+      {% else %}
+        <li>No strengths were stored.</li>
+      {% endfor %}
+    </ul>
+    <h3>What Is Missing or Weak</h3>
+    <ul>
+      {% for item in latest_application["candidate_missing"] %}
+        <li>{{ item["finding_text"] if item["finding_text"] is defined else item["text"] }}</li>
+      {% else %}
+        <li>No missing items were stored.</li>
+      {% endfor %}
+    </ul>
+    <h3>Matched Skills</h3>
+    <div class="requirements">
+      {% for skill in latest_application["matched_skills"] %}
+        <span class="tag strong">{{ skill }}</span>
+      {% else %}
+        <span class="subtle">No matched skills detected yet.</span>
+      {% endfor %}
+    </div>
+    {% if latest_application["keywords_found"] %}
+      <h3>Keywords Found</h3>
+      <div class="requirements">
+        {% for keyword in latest_application["keywords_found"] %}
+          <span class="tag">{{ keyword }}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% if latest_application["rejection_reasons"] %}
+      <h3>Why It Was Not Accepted</h3>
+      <ul>
+        {% for reason in latest_application["rejection_reasons"] %}
+          <li>{{ reason }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if latest_application["quality_warnings"] %}
+      <h3>Quality Notes</h3>
+      <ul>
+        {% for warning in latest_application["quality_warnings"] %}
+          <li>{{ warning }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </article>
+</section>
+{% endif %}
+{% endblock %}

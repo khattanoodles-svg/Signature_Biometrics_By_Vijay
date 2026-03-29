@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">Hiring Intelligence Platform</p>
+    <h1>Move from resume intake to ranked selection with a sharper hiring interface.</h1>
+    <p>
+      Candidates register, log in, review realistic openings, and submit a Word resume against a specific role. 
+      Admins review role-wise rankings, strengths, gaps, and deeper candidate evidence through a high-visibility dashboard.
+    </p>
+    <div class="hero-actions">
+      <a class="button primary" href="{{ url_for('register') }}">Start as Candidate</a>
+      <a class="button secondary" href="{{ url_for('admin_login') }}">Admin Access</a>
+    </div>
+  </div>
+</section>
+
+<section class="card-grid three">
+  <article class="card">
+    <h2>Candidate Onboarding</h2>
+    <p>Registration captures the candidate identity, contact details, candidate code, and indexed profile for role-wise tracking.</p>
+  </article>
+  <article class="card">
+    <h2>Role-Specific Applications</h2>
+    <p>Each opening carries realistic requirements, responsibilities, qualifications, and hiring context before a resume is submitted.</p>
+  </article>
+  <article class="card">
+    <h2>Admin Selection Review</h2>
+    <p>Hiring teams compare candidates by score, evidence, pros, cons, risks, blindspots, and overall ranking for each role.</p>
+  </article>
+</section>
+{% endblock %}

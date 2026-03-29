@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Job Analyser{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="{{ url_for('home') }}">Job Application and Selection Analyser</a>
+      <nav class="nav-links">
+        <a href="{{ url_for('home') }}">Home</a>
+        {% if session.get('role') == 'candidate' %}
+          <a href="{{ url_for('candidate_jobs') }}">Candidate Jobs</a>
+        {% endif %}
+        {% if session.get('role') == 'admin' %}
+          <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+        {% endif %}
+        {% if session.get('role') %}
+          <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+          <a href="{{ url_for('register') }}">Register</a>
+          <a href="{{ url_for('candidate_login') }}">Candidate Login</a>
+          <a href="{{ url_for('admin_login') }}">Admin Login</a>
+        {% endif %}
+      </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <section class="flash-stack">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </section>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>
