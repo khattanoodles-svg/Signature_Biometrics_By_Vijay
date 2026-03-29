@@ -115,6 +115,18 @@
   <article class="card">
     <h2>Important Resume Signals</h2>
     <p class="subtle">{{ latest_application["profile_summary"] or latest_application["summary"].get("reasoning", "No reasoning stored.") }}</p>
+    {% if latest_application["job_requirement_alignment"] %}
+      <h3>Match Against Job Requirements</h3>
+      <p class="subtle">{{ latest_application["job_requirement_alignment"] }}</p>
+    {% endif %}
+    {% if latest_application["resume_evidence_summary"] %}
+      <h3>Resume Evidence Used</h3>
+      <p class="subtle">{{ latest_application["resume_evidence_summary"] }}</p>
+    {% endif %}
+    {% if latest_application["final_decision_reason"] %}
+      <h3>Final Decision Reason</h3>
+      <p class="subtle">{{ latest_application["final_decision_reason"] }}</p>
+    {% endif %}
     {% if latest_application["ranking_basis"] %}
       <h3>Ranking Basis</h3>
       <p class="subtle">{{ latest_application["ranking_basis"] }}</p>

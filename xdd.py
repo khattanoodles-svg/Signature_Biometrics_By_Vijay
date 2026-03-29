@@ -27,7 +27,7 @@ UPLOAD_DIR = BASE_DIR / "uploads"
 STATIC_DIR = BASE_DIR / "static"
 TEMPLATE_DIR = BASE_DIR / "templates"
 ALLOWED_EXTENSIONS = {"docx"}
-FEATHERLESS_API_KEY = os.getenv("FEATHERLESS_API_KEY", "rc_a1a3fe28692b8f650dfa719ef1873fcfc69080fdc73798c37a1f71eed9fb60c1").strip()
+FEATHERLESS_API_KEY = os.getenv("FEATHERLESS_API_KEY", "rc_ad6ea9a9354ea7b4186efbc0ccf295ccf6af1fcf6a406a58bc8cea0b37203e3e").strip()
 FEATHERLESS_MODEL = os.getenv("FEATHERLESS_MODEL", "meta-llama/Meta-Llama-3.1-70B-Instruct")
 
 SKILL_CATALOG = {
@@ -360,6 +360,10 @@ def finalize_decision(analysis, job):
     analysis["summary"]["fit_label"] = fit_label
     analysis["summary"]["rejection_reasons"] = rejection_reasons
     analysis["summary"]["job_title"] = job["title"]
+    analysis["summary"]["job_summary"] = job.get("summary", "")
+    analysis["summary"]["job_requirement_alignment"] = analysis.get("job_requirement_alignment", "")
+    analysis["summary"]["resume_evidence_summary"] = analysis.get("resume_evidence_summary", "")
+    analysis["summary"]["final_decision_reason"] = analysis.get("final_decision_reason", "")
     analysis["summary"]["ranking_basis"] = analysis.get("ranking_basis", "")
     return analysis
 
@@ -415,6 +419,10 @@ Focus strongly on:
 - what the candidate lacks
 - clear ranking basis for comparison against other applicants for the same job
 
+The final decision must be based on the selected job requirements plus the actual resume content.
+Use the resume text as the primary evidence source and explicitly compare it with the job requirements, qualifications, responsibilities, and minimum experience.
+Do not give a generic answer. The output must explain why this resume does or does not fit this specific job.
+
 Required JSON format:
 {{
   "extracted_name": "string",
@@ -433,6 +441,9 @@ Required JSON format:
   ],
   "overall_fit_score": 0,
   "recommendation_status": "Rejected|Review|Shortlisted",
+  "job_requirement_alignment": "clear explanation of how the resume matches or misses the selected job requirements",
+  "resume_evidence_summary": "concise summary of the strongest evidence found directly inside the resume",
+  "final_decision_reason": "clear final reason for the recommendation based on job requirements and resume evidence",
   "ranking_basis": "why this candidate should be ranked at this level for this job",
   "candidate_has": [
     {{"text": "has strong Python and Flask backend experience", "priority": 5}}
@@ -482,6 +493,9 @@ Required JSON format:
         parsed["achievements"] = parsed.get("achievements", [])
         parsed["overall_fit_score"] = parsed.get("overall_fit_score", 0)
         parsed["recommendation_status"] = parsed.get("recommendation_status", "Review")
+        parsed["job_requirement_alignment"] = parsed.get("job_requirement_alignment", "")
+        parsed["resume_evidence_summary"] = parsed.get("resume_evidence_summary", "")
+        parsed["final_decision_reason"] = parsed.get("final_decision_reason", "")
         parsed["ranking_basis"] = parsed.get("ranking_basis", "")
         parsed["candidate_has"] = parsed.get("candidate_has", [])
         parsed["candidate_missing"] = parsed.get("candidate_missing", [])
@@ -591,6 +605,9 @@ def analyze_resume(candidate, job, resume_text):
         llm_result["projects"] = [str(item).strip() for item in llm_result.get("projects", []) if str(item).strip()]
         llm_result["achievements"] = [str(item).strip() for item in llm_result.get("achievements", []) if str(item).strip()]
         llm_result["cgpa"] = str(llm_result.get("cgpa", "") or "").strip()
+        llm_result["job_requirement_alignment"] = str(llm_result.get("job_requirement_alignment", "") or "").strip()
+        llm_result["resume_evidence_summary"] = str(llm_result.get("resume_evidence_summary", "") or "").strip()
+        llm_result["final_decision_reason"] = str(llm_result.get("final_decision_reason", "") or "").strip()
         llm_result["ranking_basis"] = str(llm_result.get("ranking_basis", "") or "").strip()
         llm_result["matched_skills"] = sorted(set(llm_result.get("matched_skills", [])).intersection(required_skills or llm_result.get("matched_skills", [])))
         llm_result["skill_score"] = round(weighted_parameter_score([item for item in llm_result["parameter_scores"] if item["name"].lower() in {"expertise", "technical depth", "role relevance"} or item["group"] == "core"]), 2)
@@ -613,6 +630,9 @@ def analyze_resume(candidate, job, resume_text):
         llm_result["summary"]["cgpa"] = llm_result["cgpa"]
         llm_result["summary"]["candidate_has"] = llm_result["candidate_has"]
         llm_result["summary"]["candidate_missing"] = llm_result["candidate_missing"]
+        llm_result["summary"]["job_requirement_alignment"] = llm_result["job_requirement_alignment"]
+        llm_result["summary"]["resume_evidence_summary"] = llm_result["resume_evidence_summary"]
+        llm_result["summary"]["final_decision_reason"] = llm_result["final_decision_reason"]
         llm_result["summary"]["ranking_basis"] = llm_result["ranking_basis"]
         llm_result["summary"]["validation_issues"] = [item["text"] for item in llm_result["blindspots"]]
         llm_result["summary"]["quality_warnings"] = [item["text"] for item in llm_result["cons"]]
@@ -684,6 +704,9 @@ def hydrate_application_record(data):
     item["keywords_found"] = item["summary"].get("keywords_found", [])
     item["cgpa"] = item["summary"].get("cgpa", "")
     item["profile_summary"] = item["summary"].get("profile_summary", "")
+    item["job_requirement_alignment"] = item["summary"].get("job_requirement_alignment", "")
+    item["resume_evidence_summary"] = item["summary"].get("resume_evidence_summary", "")
+    item["final_decision_reason"] = item["summary"].get("final_decision_reason", "")
     item["ranking_basis"] = item["summary"].get("ranking_basis", "")
     item["candidate_has"] = item["summary"].get("candidate_has", [])
     item["candidate_missing"] = item["summary"].get("candidate_missing", [])

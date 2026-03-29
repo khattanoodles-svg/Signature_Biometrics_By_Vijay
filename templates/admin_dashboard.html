@@ -161,6 +161,15 @@
     <p><strong>Fit:</strong> {{ selected_candidate["fit_label"] }} | <strong>Status:</strong> {{ selected_candidate["status"] }}</p>
     <p><strong>CGPA:</strong> {{ selected_candidate["cgpa"] or "Not detected" }}</p>
     <p class="subtle">{{ selected_candidate["profile_summary"] or selected_candidate["summary"].get("reasoning", "No summary stored.") }}</p>
+    {% if selected_candidate["job_requirement_alignment"] %}
+      <p><strong>Job Requirement Alignment:</strong> {{ selected_candidate["job_requirement_alignment"] }}</p>
+    {% endif %}
+    {% if selected_candidate["resume_evidence_summary"] %}
+      <p><strong>Resume Evidence:</strong> {{ selected_candidate["resume_evidence_summary"] }}</p>
+    {% endif %}
+    {% if selected_candidate["final_decision_reason"] %}
+      <p><strong>Final Decision Reason:</strong> {{ selected_candidate["final_decision_reason"] }}</p>
+    {% endif %}
     {% if selected_candidate["ranking_basis"] %}
       <p><strong>Ranking Basis:</strong> {{ selected_candidate["ranking_basis"] }}</p>
     {% endif %}
